@@ -6,7 +6,7 @@
 
 
 # dependencies
-/frontend/node_modules
+/frontend/node_modules/
 /frontend/.pnp
 /frontend/.pnp.js
 
@@ -17,6 +17,7 @@
 /frontend/build
 
 # misc
+/frontend/.vscode/
 /frontend.DS_Store
 /frontend.env.local
 /frontend.env.development.local
@@ -26,3 +27,6 @@
 /frontendnpm-debug.log*
 /frontendyarn-debug.log*
 /frontendyarn-error.log*
+
+*storybook.log
+/frontend/.storybook/
