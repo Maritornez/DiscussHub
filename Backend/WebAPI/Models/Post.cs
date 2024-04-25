@@ -21,7 +21,7 @@ public partial class Post
     public int? ReplyToPostId { get; set; }
 
     [Column("userID")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("isOriginalPost")]
     public bool IsOriginalPost { get; set; }

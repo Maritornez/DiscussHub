@@ -98,6 +98,7 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
+        // При удалении пользователя во все связанные с ним посты, рейтинги и треды подставляется UserId = null
         // DELETE api/<UserController>/5
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
@@ -108,7 +109,7 @@ namespace WebAPI.Controllers
             {
                 return NotFound();
             }
-
+            
             context.User.Remove(user);
             await context.SaveChangesAsync();
             

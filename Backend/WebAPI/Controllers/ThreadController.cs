@@ -41,6 +41,30 @@ namespace WebAPI.Controllers
 
             return Ok(thread);
         }
+        
+        // GET: api/<ThreadController>/OnlyWithOriginalPost/5
+        [HttpGet("OnlyWithOriginalPost/{id:int}")]
+        public async Task<IActionResult> GetOnlyWithOriginalPost(int id)
+        {
+            var thread = await context.Thread
+                .Include(t => t.Post)
+                .Include(t => t.Rating)
+                .Include(t => t.Theme)
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            
+            
+            if (thread == null)
+            {
+                return NotFound();
+            }
+            
+            // Filter posts: keep only the original
+            thread.Post = thread.Post.Where(p => p.IsOriginalPost).ToList();
+
+            return Ok(thread);
+        }
 
         // POST api/<ThreadController>
         [HttpPost]

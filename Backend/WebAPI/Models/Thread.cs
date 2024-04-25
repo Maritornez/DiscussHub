@@ -18,7 +18,7 @@ public partial class Thread
     public int ThemeId { get; set; }
 
     [Column("userID")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Required]
     [Column("authorIpAddress")]

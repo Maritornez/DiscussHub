@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Models;
 
@@ -11,9 +12,11 @@ using WebAPI.Models;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ForumContext))]
-    partial class ForumContextModelSnapshot : ModelSnapshot
+    [Migration("20240422142109_SetThemeNameToUnique")]
+    partial class SetThemeNameToUnique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -149,7 +152,7 @@ namespace WebAPI.Migrations
                         .HasColumnType("varchar(300)")
                         .HasColumnName("title");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int")
                         .HasColumnName("userID");
 
@@ -181,7 +184,7 @@ namespace WebAPI.Migrations
                         .HasColumnType("int")
                         .HasColumnName("threadID");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int")
                         .HasColumnName("userID");
 
@@ -260,7 +263,7 @@ namespace WebAPI.Migrations
                         .HasColumnType("int")
                         .HasColumnName("themeID");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int")
                         .HasColumnName("userID");
 
@@ -364,13 +367,13 @@ namespace WebAPI.Migrations
                     b.HasOne("WebAPI.Models.Thread", "Thread")
                         .WithMany("Post")
                         .HasForeignKey("ThreadId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Post_Thread");
 
                     b.HasOne("WebAPI.Models.User", "User")
                         .WithMany("Post")
                         .HasForeignKey("UserId")
+                        .IsRequired()
                         .HasConstraintName("FK_Post_User");
 
                     b.Navigation("ReplyToPost");
@@ -385,13 +388,13 @@ namespace WebAPI.Migrations
                     b.HasOne("WebAPI.Models.Thread", "Thread")
                         .WithMany("Rating")
                         .HasForeignKey("ThreadId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Rating_Thread");
 
                     b.HasOne("WebAPI.Models.User", "User")
                         .WithMany("Rating")
                         .HasForeignKey("UserId")
+                        .IsRequired()
                         .HasConstraintName("FK_Rating_User");
 
                     b.Navigation("Thread");
@@ -404,13 +407,13 @@ namespace WebAPI.Migrations
                     b.HasOne("WebAPI.Models.Theme", "Theme")
                         .WithMany("Thread")
                         .HasForeignKey("ThemeId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Thread_Theme");
 
                     b.HasOne("WebAPI.Models.User", "User")
                         .WithMany("Thread")
                         .HasForeignKey("UserId")
+                        .IsRequired()
                         .HasConstraintName("FK_Thread_User");
 
                     b.Navigation("Theme");

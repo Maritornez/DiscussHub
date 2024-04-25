@@ -19,6 +19,16 @@ namespace WebAPI.Controllers
                 .Include(t => t.Thread)
                 .ToListAsync());
         }
+        
+        // GET: api/Theme/WithoutThreads
+        [HttpGet("WithoutThreads")]
+        public async Task<IActionResult> GetThemesWithoutThreads()
+        {
+            return Ok(await context.Theme
+                .Include(t => t.Image)
+                .ToListAsync());
+        }
+        
 
         // GET api/<Theme>/5
         [HttpGet("{id:int}")]
@@ -28,6 +38,39 @@ namespace WebAPI.Controllers
                 .Include(t => t.Image)
                 .Include(t => t.Thread)
                 .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (theme == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(theme);
+        }
+        
+        // GET: api/Theme/ThemeWithoutThreads/5
+        [HttpGet("WithoutThreads/{id:int}")]
+        public async Task<IActionResult> GetThemeWithoutThreads(int id)
+        {
+            var theme = await context.Theme
+                .Include(t => t.Image)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (theme == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(theme);
+        }
+        
+        // GET api/<Theme>/name
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetByName(string name)
+        {
+            var theme = await context.Theme
+                .Include(t => t.Image)
+                .Include(t => t.Thread)
+                .FirstOrDefaultAsync(t => t.Name == name);
 
             if (theme == null)
             {

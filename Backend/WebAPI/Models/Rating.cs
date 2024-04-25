@@ -18,7 +18,7 @@ public partial class Rating
     public int ThreadId { get; set; }
 
     [Column("userID")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("isPositive")]
     public bool IsPositive { get; set; }

@@ -42,66 +42,96 @@ public partial class ForumContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        /*
+         * Каскадные отношения:
+         * При удалении темы удаляются все связанные с ней треды
+         * При удалении треда удаляются все связанные с ним посты и рейтинги
+         *
+         * Но при удалении пользователя во все связанные с ним посты, рейтинги и треды подставляется UserId = NULL
+         */
+
         modelBuilder.Entity<Image>(entity =>
         {
-            entity.HasOne(d => d.Post).WithMany(p => p.Image).HasConstraintName("FK_Image_Post");
+            entity.HasOne(d => d.Post)
+                .WithMany(p => p.Image)
+                .HasConstraintName("FK_Image_Post");
 
-            entity.HasOne(d => d.Theme).WithOne(p => p.Image).HasConstraintName("FK_Image_Theme");
+            entity.HasOne(d => d.Theme)
+                .WithOne(p => p.Image)
+                .HasConstraintName("FK_Image_Theme");
             
-            entity.HasOne(d => d.User).WithOne(p => p.Image).HasConstraintName("FK_Image_User");
+            entity.HasOne(d => d.User)
+                .WithOne(p => p.Image)
+                .HasConstraintName("FK_Image_User");
         });
 
         modelBuilder.Entity<Level>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_PrivilegeLevel");
+            entity.HasKey(e => e.Id)
+                .HasName("PK_PrivilegeLevel");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasOne(d => d.ReplyToPost).WithMany(p => p.InverseReplyToPost).HasConstraintName("FK_Post_Post");
+            entity.HasOne(d => d.ReplyToPost)
+                .WithMany(p => p.InverseReplyToPost)
+                .HasConstraintName("FK_Post_Post");
 
-            entity.HasOne(d => d.Thread).WithMany(p => p.Post)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Thread)
+                .WithMany(p => p.Post)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Post_Thread");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Post)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Post)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Post_User");
         });
 
         modelBuilder.Entity<Rating>(entity =>
         {
-            entity.HasOne(d => d.Thread).WithMany(p => p.Rating)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Thread)
+                .WithMany(p => p.Rating)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Rating_Thread");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Rating)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Rating)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Rating_User");
         });
 
         modelBuilder.Entity<Thread>(entity =>
         {
-            entity.HasOne(d => d.Theme).WithMany(p => p.Thread)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Theme)
+                .WithMany(p => p.Thread)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Thread_Theme");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Thread)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Thread)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Thread_User");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.PassHash).IsFixedLength();
+            entity.Property(e => e.PassHash)
+                .IsFixedLength();
 
-            entity.HasOne(d => d.Level).WithMany(p => p.User)
+            entity.HasOne(d => d.Level)
+                .WithMany(p => p.User)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Level");
         });
+        
+        modelBuilder.Entity<Theme>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
 
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
+

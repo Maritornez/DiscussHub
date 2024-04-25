@@ -1,27 +1,23 @@
 import React from 'react';
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Theme from './components/Theme';
-import ThemePage from './components/ThemePage';
+//import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
+import Header from './components/Header';
+import ThemeList from './components/ThemeList';
+import Home from './components/Home';
+import ThreadList from './components/ThreadList';
 
-function App() {
-  const [themes, setThemes] = useState([]);
+export default function App() {
+  
 
   return (
-    <Router>
-      <div className="App">
-        <div className="left-panel">
-          <Routes>
-            <Route exact path="/" element={<Theme themes={themes} setThemes={setThemes} />} />
-            <Route path="/theme/:id" element={<ThemePage />} />
-          </Routes>
-        </div>
-        <div className="right-panel">
-          {/* Другие компоненты или контент */}
-        </div>
-      </div>
-    </Router>
+    <BrowserRouter>
+      <Header />
+      <ThemeList />
+      <Routes>
+        <Route path='/' element = {<Home />}/>
+        <Route path='/theme/:name' element = {<ThreadList />}/>
+        <Route path="*" element={<Navigate to ="/" />}/>
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
