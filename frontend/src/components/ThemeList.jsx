@@ -1,12 +1,12 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeService from '../api/ThemeService';
 import ThemeCreate from './ThemeCreate';
 
-export default function ThemeList() {
+export default function ThemeList({user}) {
   // Состояния компонента
   const [themes, setThemes] = useState([]);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -28,13 +28,14 @@ export default function ThemeList() {
     const isDeleted = await ThemeService.delete(id);
     if (isDeleted) {
       removeThemeOnClient(id);
+      navigate("/")
     }
   }
   
   // Функция редактирования темы
-  const handleEdit = async (id) => {
-
-  }
+  // const handleEdit = async (id) => {
+    //...
+  // }
 
   // Вывод списка тем, каждая из которых содержит 
   // ссылку на страницу темы и кнопку удаления
@@ -47,12 +48,16 @@ export default function ThemeList() {
             <Link to={`/theme/${name}`}>
               <strong>{name}</strong> ({description})
             </Link>
-            <button onClick={() => handleDelete(id)}>
-              Удалить
-            </button>
-            <button onClick={() => handleEdit(id)}>
-              Редактировать
-            </button>
+
+            {user && user.isAuthenticated && user.userRole === "admin" &&
+              <button onClick={() => handleDelete(id)}>
+                Удалить
+              </button> } {" "}
+            
+            {/*user && user.isAuthenticated && user.userRole === "admin" &&
+              <button onClick={() => handleEdit(id)}>
+                Редактировать
+              </button>*/}
           </div>
         ))}
       </>
@@ -62,7 +67,8 @@ export default function ThemeList() {
   return (
     <>
       <Themes />
-      <ThemeCreate addThemeOnClient={addThemeOnClient} />
+      {user && user.isAuthenticated && user.userRole === "admin" &&
+        <ThemeCreate addThemeOnClient={addThemeOnClient}/>}
     </>
   );
 }

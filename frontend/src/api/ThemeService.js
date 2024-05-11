@@ -1,5 +1,5 @@
-//const WebAPI_URL = "http://localhost:5000/api/";
-const WebAPI_URL = "https://localhost:44343/api/";
+import WebAPI_URL from "../config.js";
+
 const URL_BASE = WebAPI_URL + "Theme/";
 
 
@@ -9,6 +9,7 @@ export default class ThemeService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE, requestOptions);
@@ -29,6 +30,7 @@ export default class ThemeService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE + "WithoutThreads/", requestOptions);
@@ -49,6 +51,7 @@ export default class ThemeService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE + id.toString(), requestOptions);
@@ -69,6 +72,7 @@ export default class ThemeService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE + name, requestOptions);
@@ -91,15 +95,15 @@ export default class ThemeService {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(theme),
+                credentials: 'include',
             };
 
-            // Вызов метода API
+            // Вызов метода WebAPI
             const response = await fetch(URL_BASE, requestOptions);
-
-            // Обработка ответа от API
+            // Обработка ответа от WebAPI
             const data = await response.json();
-            // Если ответ 200-299 и создание прошло успешно
-            if (response.ok) {
+
+            if (response.ok) { // если ответ 200-299 и создание прошло успешно
                 return data;
             } else {
                 throw new Error("Failed to create theme");
@@ -115,6 +119,7 @@ export default class ThemeService {
             const requestOptions = {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
             };
     
             const response = await fetch(URL_BASE + id.toString(), requestOptions);

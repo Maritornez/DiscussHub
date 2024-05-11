@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Context;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
@@ -39,6 +41,7 @@ namespace WebAPI.Controllers
 
         // POST api/<RatingController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(Rating rating)
         {
             if (!ModelState.IsValid)
@@ -55,6 +58,7 @@ namespace WebAPI.Controllers
 
         // PUT api/<RatingController>/5
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, Rating rating)
         {
             if (id != rating.Id)
@@ -91,6 +95,7 @@ namespace WebAPI.Controllers
 
         // DELETE api/<RatingController>/5
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var rating = await context.Rating.FindAsync(id);

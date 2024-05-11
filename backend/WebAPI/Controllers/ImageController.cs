@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Context;
 using WebAPI.Models;
+
 
 namespace WebAPI.Controllers
 {
@@ -41,6 +44,7 @@ namespace WebAPI.Controllers
 
         // POST api/<ImageController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(Image image)
         {
             if (!ModelState.IsValid)
@@ -57,6 +61,7 @@ namespace WebAPI.Controllers
 
         // PUT api/<ImageController>/5
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, Image image)
         {
             if (id != image.Id)
@@ -93,6 +98,7 @@ namespace WebAPI.Controllers
 
         // DELETE api/<ImageController>/5
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var image = await context.Image.FindAsync(id);

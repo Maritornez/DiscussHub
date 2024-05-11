@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
-using WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Context;
+//using WebAPI.Models;
 using Thread = WebAPI.Models.Thread;
 
 namespace WebAPI.Controllers
@@ -68,13 +70,14 @@ namespace WebAPI.Controllers
 
         // POST api/<ThreadController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(Thread thread)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
+            
             context.Thread.Add(thread);
             await context.SaveChangesAsync();
             
@@ -84,6 +87,7 @@ namespace WebAPI.Controllers
 
         // PUT api/<ThreadController>/5
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, Thread thread)
         {
             if (id != thread.Id)
@@ -120,6 +124,7 @@ namespace WebAPI.Controllers
 
         // DELETE api/<ThreadController>/5
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var thread = await context.Thread.FindAsync(id);

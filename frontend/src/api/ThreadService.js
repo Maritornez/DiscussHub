@@ -1,5 +1,5 @@
-//const WebAPI_URL = "http://localhost:5000/api/";
-const WebAPI_URL = "https://localhost:44343/api/";
+import WebAPI_URL from "../config.js";
+
 const URL_BASE = WebAPI_URL + "Thread/";
 
 export default class ThreadService {
@@ -8,6 +8,7 @@ export default class ThreadService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE, requestOptions);
@@ -26,6 +27,7 @@ export default class ThreadService {
     //     const requestOptions = {
     //         method: "GET",
     //         headers: {"Content-Type": "application/json"},
+    //         credentials: 'include',
     //     };
 
     //     const response = await fetch(URL_BASE + "WithoutPosts/", requestOptions);
@@ -36,6 +38,7 @@ export default class ThreadService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE + id, requestOptions);
@@ -55,6 +58,7 @@ export default class ThreadService {
             const requestOptions = {
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
+                credentials: 'include',
             };
 
             const response = await fetch(URL_BASE + "OnlyWithOriginalPost/" + id, requestOptions);
@@ -76,12 +80,13 @@ export default class ThreadService {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(thread),
+                credentials: 'include',
             };
 
-            // Вызов метода API
+            // Вызов метода WebAPI
             const response = await fetch(URL_BASE, requestOptions);
 
-            // Обработка ответа от API
+            // Обработка ответа от WebAPI
             const data = await response.json();
             // Если ответ 200-299 и создание прошло успешно
             if (response.ok) {
@@ -95,11 +100,34 @@ export default class ThreadService {
         }
     }
 
+    static async update(thread) {
+        try {
+            const requestOptions = {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(thread),
+                credentials: 'include',
+            };
+
+            const response = await fetch(URL_BASE + thread.id.toString(), requestOptions);
+            const data = await response.json();
+            if (response.ok) {
+                return data;
+            } else {
+                throw new Error("Failed to update thread");
+            }
+        } catch (error) {
+            console.error("Error while updating thread:", error);
+            throw error;
+        }
+    }
+
     static async delete(id) {
         try {
             const requestOptions = {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
             };
     
             const response = await fetch(URL_BASE + id.toString(), requestOptions);

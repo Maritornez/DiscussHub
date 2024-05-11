@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Context;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
@@ -20,7 +22,7 @@ namespace WebAPI.Controllers
                 .ToListAsync());
         }
         
-        // GET: api/Theme/WithoutThreads
+        // GET: api/<Theme>/WithoutThreads
         [HttpGet("WithoutThreads")]
         public async Task<IActionResult> GetThemesWithoutThreads()
         {
@@ -82,6 +84,7 @@ namespace WebAPI.Controllers
         
         // POST api/<ThemeController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(Theme theme)
         {
             if (!ModelState.IsValid)
@@ -98,6 +101,7 @@ namespace WebAPI.Controllers
         
         // PUT api/<Theme>/5
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, Theme theme)
         {
             if (id != theme.Id)
@@ -133,6 +137,7 @@ namespace WebAPI.Controllers
         
         // DELETE api/<Theme>/5
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var theme = await context.Theme.FindAsync(id);

@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Context;
 using WebAPI.Models;
+
 
 namespace WebAPI.Controllers
 {
@@ -42,9 +45,31 @@ namespace WebAPI.Controllers
 
             return Ok(post);
         }
+        
+        // GET api/<PostController>/WithThreadId/5
+        [HttpGet("WithThreadId/{id:int}")]
+        public async Task<IActionResult> GetWithThreadId(int id)
+        {
+            var post = await context.Post
+                .Include(p => p.Image)
+                .Include(p => p.InverseReplyToPost)
+                .Include(p => p.ReplyToPost)
+                .Include(p => p.Thread)
+                .Include(p => p.User)
+                .Where(p => p.ThreadId == id)
+                .ToListAsync();
 
+            if (post.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(post);
+        }
+        
         // POST api/<PostController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(Post post)
         {
             if (!ModelState.IsValid)
@@ -55,12 +80,33 @@ namespace WebAPI.Controllers
             context.Post.Add(post);
             await context.SaveChangesAsync();
             
-
-            return CreatedAtAction("Get", new { id = post.Id }, post);
+            // Create post to return
+            var postToPush = await context.Post
+                .Include(p => p.Image)
+                .Include(p => p.InverseReplyToPost)
+                .Include(p => p.ReplyToPost)
+                .Include(p => p.Thread)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(t => t.Id == post.Id);
+            
+            // // Load data about User who created post
+            // var user = await context.User.FindAsync(post.UserId);
+            // if (user == null)
+            // {
+            //     // If user not found, return BadRequest
+            //     return BadRequest("Invalid UserId");
+            // }
+            //
+            // // Load data about User who created post
+            // post.User = user;
+            
+            
+            return CreatedAtAction("Get", new { id = post.Id }, postToPush);
         }
 
         // PUT api/<PostController>/5
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, Post post)
         {
             if (id != post.Id)
@@ -97,6 +143,7 @@ namespace WebAPI.Controllers
 
         // DELETE api/<PostController>/5
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var post = await context.Post.FindAsync(id);
