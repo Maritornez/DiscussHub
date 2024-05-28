@@ -1,8 +1,9 @@
-import React from "react"
-import { Link, Outlet } from "react-router-dom"
+import React from "react";
+import { Link, Outlet } from "react-router-dom";
 import ThemeList from './ThemeList';
-import { Layout as LayoutAntd, Menu, theme } from "antd"
-const { Header, Sider, Content, Footer } = LayoutAntd
+import logoImage from '../images/icon.png';
+import { Layout as LayoutAntd, Menu, theme } from "antd";
+const { Header, Sider, Content, Footer } = LayoutAntd;
 
 
 const Layout = ({ user }) => {
@@ -65,6 +66,8 @@ const Layout = ({ user }) => {
           width: "100%"
         }}
       >
+        <img src={logoImage} alt="-" width="64" height="64" style={{
+            float: "left",}}/>
         <div className="demo-logo" />
         <div 
           style={{
@@ -94,12 +97,23 @@ const Layout = ({ user }) => {
       </Header>
       <LayoutAntd>
         <Sider
-          width={200}
+          width={300}
           style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%', // Занимает всю высоту окна просмотра
             background: colorBgContainer,
+            padding: '0 8px 8px',
           }}
         >
           <ThemeList user={user}/>
+          <Footer style={{ marginTop: 'auto', 
+                       textAlign: 'center',
+                       color: '#c4c4c4',
+                       backgroundColor: '#fff',
+                       height: '80px',
+                       overflow: 'auto', }}
+          >DiscussHub &copy; 2024. <br/>Все права защищены</Footer>
         </Sider>
         <LayoutAntd
           style={{
@@ -117,8 +131,9 @@ const Layout = ({ user }) => {
           >
             <Outlet /> {/* Рендерит текущий дочерний маршрут */}
           </Content>
-        </LayoutAntd>
+        </LayoutAntd> 
       </LayoutAntd>
+      
     </LayoutAntd>
   )
 }

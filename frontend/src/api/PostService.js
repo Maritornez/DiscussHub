@@ -110,6 +110,28 @@ export default class PostService {
         }
     }
 
+    static async update(post) {
+        try {
+            const requestOptions = {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(post),
+                credentials: 'include'
+            };
+
+            const response = await fetch(URL_BASE + post.id.toString(), requestOptions);
+            const data = await response.json();
+            if (response.ok) {
+                return data;
+            } else {
+                throw new Error("Failed to update post");
+            }
+        } catch (error) {
+            console.error("Error while updating post:", error);
+            throw error;
+        }
+    }
+
     static async delete(id) {
         try {
             const requestOptions = {

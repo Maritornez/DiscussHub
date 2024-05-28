@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 // HashLink используется для создания якорей на странице. Якори прикреплены к постам. Ссылки в ответах к постам ведут к якорям постов
 import { HashLink } from 'react-router-hash-link';
+import { Button, Form, Tooltip, Tree  } from 'antd';
+import { EditOutlined, DeleteOutlined  } from '@ant-design/icons';
 import ThreadService from '../api/ThreadService';
 import PostService from '../api/PostService';
 import PostCreate from './PostCreate';
@@ -13,8 +15,9 @@ export default function PostList({user}) {
   const { name: themeName, id: threadId } = useParams(); 
 
   const [thread, setThread] = useState(null);
-  const [originalPost, setOriginalPost] = useState(null);
   const [posts, setPosts] = useState([]);
+
+  const [form] = Form.useForm(); // форма для создания поста
 
   const loadThreadAndPosts = useCallback(async () => {
     // Загрузка треда.
@@ -26,17 +29,12 @@ export default function PostList({user}) {
     // Загрузка постов треда с помощью метода из PostService
     const postsData = await PostService.getByThreadId(threadId);
     setPosts(postsData);
-    //console.log(posts)      
-
-    const originalPostData = postsData.find(post => post.isOriginalPost);
-    setOriginalPost(originalPostData);
-    //console.log("originalPost: ", originalPost);
+    //console.log(posts)
   }, [threadId]);
 
   useEffect(() => {
     loadThreadAndPosts();
   }, [threadId, loadThreadAndPosts]);
-
 
   // Функция обновления конкретного поста
   // const updateThePostOnClient = (post) => {
@@ -76,87 +74,145 @@ export default function PostList({user}) {
   };
 
 
-  // Вывод списка постов, каждый из которых содержит
-  // кнопку удаления
-  function Posts() {
-    const copyPostId = (postId) => {
-      const replyToPostInput = document.querySelector('input[name="replyToPostId"]');
-      replyToPostInput.value = postId;
+  // Функция для преобразования данных о постах в формат, который может использовать Tree
+  const convertPostsToTreeData = (posts) => {
+    // Создаем объект для быстрого доступа к постам по id
+    const postsById = {};
+    posts.forEach(post => {
+      postsById[post.id] = { ...post, children: [] };
+    });
+  
+    // Создаем дерево
+    posts.forEach(post => {
+      if (post.replyToPostId) {
+        const parentPost = postsById[post.replyToPostId];
+        if (parentPost) {
+          parentPost.children.push(postsById[post.id]);
+        }
+      }
+    });
+  
+    // Преобразуем данные в формат, который может использовать Tree
+    const treeData = Object.values(postsById).filter(post => !post.replyToPostId).map(post => convertPostToTreeNode(post));
+  
+    return treeData;
+  };
+  
+  const convertPostToTreeNode = (post) => ({
+    title: 
+      <div style={{
+        border: "1px solid #ccc", /* Рамка вокруг поста */
+        backgroundColor: "#f5f5f5", /* Цвет фона поста */
+        padding: "10px", /* Отступ внутри поста */
+        marginBottom: "10px", /* Отступ между постами */
+        wordWrap: "break-word", /* Перенос слов */
+        hyphens: "auto", /* Автоматический перенос слов с дефисом */
+      }}>
+        #{post.id} {" "}
+        {formatDateTime(post.createdAt)} {" "}
+        {post.userAuthor && post.userAuthor.userName} {" "}
+
+        {user && user.isAuthenticated &&
+          <Tooltip title="Ответить">
+            <Button type="text" size="small" onClick={() => copyPostId(post.id)}>↩</Button> {" "}
+          </Tooltip>}
+        {!post.isOriginalPost && user && user.isAuthenticated && (user.userRole === "moderator" || user.userRole === "admin") &&
+          <Button type="text" size="small" onClick={() => handleDelete(post.id)}><DeleteOutlined /></Button>} {" "}
+        <br />
+
+        <strong>{post.title}</strong>
+        <br />
+        <br />
+        <p>{post.text}</p>
+        
+        {post.inverseReplyToPost.length !== 0 && <>Ответы: {" "}</>} 
+        {post.inverseReplyToPost.map(({ id }) => (
+            <span key={id}>
+              <HashLink to={`/theme/${themeName}/thread/${threadId}#${id}`}> 
+                #{id} {" "}
+              </HashLink>
+            </span>
+        ))}
+
+        <hr />
+      </div>,
+    key: post.id,
+    children: post.children.map(convertPostToTreeNode),
+  });
+
+  const copyPostId = (postId) => {
+      // const replyToPostInput = document.querySelector('input[name="replyToPostId"]');
+      // replyToPostInput.value = postId;
+      form.setFieldsValue({ replyToPostId: postId });
     };
 
-    return (
-      <>
-        <h3>Тред #{thread && thread.id}</h3>
-        <hr />
-
-        {/* Оригинальный пост */}
-        <div>
-          #{originalPost && originalPost.id} {" "}
-          {thread && thread.isPinned ? "📌" : ""} {" "}
-          {thread && thread.isArchived ? "🗃️" : ""} {" "} 
-          {/*console.log("originalPost in jsx: ", originalPost)*/}
-          {originalPost && formatDateTime(originalPost.createdAt)} {" "}
-          {originalPost && originalPost.user && originalPost.user.userName} {" "}
-
-          {user && user.isAuthenticated && 
-            <button onClick={() => copyPostId(originalPost && originalPost.id)}>Ответить</button>} {" "}
-
-          <h4>{originalPost && originalPost.title}</h4>
-          <p>{originalPost && originalPost.text}</p>
- 
-          {originalPost && originalPost.inverseReplyToPost 
-            && originalPost.inverseReplyToPost.length !== 0 
-            && <>Ответы: {" "}</>}
-          {originalPost && originalPost.inverseReplyToPost 
-            && originalPost.inverseReplyToPost.map(({ id }) => (
-              <span key={id}>
-                <HashLink to={`/theme/${themeName}/thread/${threadId}#${id}`}>
-                  #{id} {" "}
-                </HashLink>
-              </span>
-          ))}
-
-          <hr />
-        </div>
+  // Вывод списка постов, каждый из которых содержит кнопку удаления
+  // function PostsOld() {
+  //   return (
+  //     <>
+  //       <h3>
+  //         Тред #{thread && thread.id} {" "}
+  //         {thread && thread.isPinned ? "📌" : ""} {" "}
+  //           {thread && thread.isArchived ? "🗃️" : ""} {" "}
+  //       </h3>
+  //       <hr />
         
-        {/* Остальные посты на странице */}
-        {posts && posts
-          .filter(post => !post.isOriginalPost)
-          .map(({ id: postId, title, text, createdAt, user: userAuthor, inverseReplyToPost }) => ( 
-            <div key={postId} id={postId}>
-              #{postId} {" "}
-              {formatDateTime(createdAt)} {" "}
-              {userAuthor && userAuthor.userName} {" "}
+  //       {posts && posts
+  //         .map(({ id: postId, title, text, createdAt, user: userAuthor, inverseReplyToPost, isOriginalPost }) => ( 
+  //           <div key={postId} id={postId}>
+  //             #{postId} {" "}
+  //             {formatDateTime(createdAt)} {" "}
+  //             {userAuthor && userAuthor.userName} {" "}
 
-              {user && user.isAuthenticated &&
-                <button onClick={() => copyPostId(postId)}>Ответить</button>} {" "}
-              {user && user.isAuthenticated && (user.userRole === "moderator" || user.userRole === "admin") &&
-                <button onClick={() => handleDelete(postId)}>Удалить</button>} {" "}
+  //             {user && user.isAuthenticated &&
+  //               <Tooltip title="Ответить">
+  //                 <Button type="text" size="small" onClick={() => copyPostId(postId)}>↩</Button> {" "}
+  //               </Tooltip>}
+  //             {!isOriginalPost && user && user.isAuthenticated && (user.userRole === "moderator" || user.userRole === "admin") &&
+  //               <Button type="text" size="small" onClick={() => handleDelete(postId)}><DeleteOutlined /></Button>} {" "}
+  //             <br />
 
-              <h4>{title}</h4>
-              <p>{text}</p>
+  //             <strong>{title}</strong>
+  //             <br />
+  //             <br />
+  //             <p>{text}</p>
               
-              {inverseReplyToPost.length !== 0 && <>Ответы: {" "}</>} 
-              {inverseReplyToPost.map(({ id }) => (
-                  <span key={id}>
-                    <HashLink to={`/theme/${themeName}/thread/${threadId}#${id}`}> 
-                      #{id} {" "}
-                    </HashLink>
-                  </span>
-              ))}
+  //             {inverseReplyToPost.length !== 0 && <>Ответы: {" "}</>} 
+  //             {inverseReplyToPost.map(({ id }) => (
+  //                 <span key={id}>
+  //                   <HashLink to={`/theme/${themeName}/thread/${threadId}#${id}`}> 
+  //                     #{id} {" "}
+  //                   </HashLink>
+  //                 </span>
+  //             ))}
 
-              <hr />
-            </div>
-          ))}
-      </>
-    )
-  }
+  //             <hr />
+  //           </div>
+  //         ))}
+  //     </>
+  //   )
+  // }
+
+
+
+// Использование Tree в компоненте
+function Posts() {
+  const treeData = convertPostsToTreeData(posts);
+
+  return (
+    <Tree
+      treeData={treeData}
+      defaultExpandAll
+      showLine
+    />
+  );
+}
 
   return (
     <>
-      <Posts />
       {user && user.isAuthenticated &&
-        <PostCreate undateAllPosts={loadThreadAndPosts} threadId={threadId} userId={user.id}/>}
+        <PostCreate undateAllPosts={loadThreadAndPosts} threadId={threadId} userId={user.id} form={form}/>}
+      <Posts />
     </>
   )
 }

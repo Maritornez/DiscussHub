@@ -114,6 +114,8 @@ namespace WebAPI.Controllers
             return Ok(image);
         }
         
+        
+        
         // Auxiliary functions
         private bool ImageExists(int id)
         {

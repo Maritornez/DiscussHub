@@ -5,8 +5,8 @@ namespace WebAPI.ViewModel
     public class LoginViewModel
     {
         [Required]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = null!;
+        [Display(Name = "Login")]
+        public string Login { get; set; } = null!;
 
         [Required]
         [DataType(DataType.Password)]

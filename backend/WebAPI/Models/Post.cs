@@ -28,11 +28,11 @@ public partial class Post
     [Column("title")]
     [StringLength(300)]
     [Unicode(true)]
-    public string Title { get; set; }
+    public string Title { get; set; } = null!;
 
     [Column("text")]
     [Unicode(true)]
-    public string Text { get; set; }
+    public string Text { get; set; } = null!;
 
     [Column("createdAt")]
     public DateTimeOffset CreatedAt { get; set; }

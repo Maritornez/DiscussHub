@@ -93,10 +93,11 @@ namespace WebAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.FindByEmailAsync(model.Email);
+                //var user = await userManager.FindByEmailAsync(model.Email);
+                var user = await userManager.FindByNameAsync(model.Login);
                 if (user?.UserName != null)
                 { 
-                    var result = await signInManager.PasswordSignInAsync(user.UserName, 
+                    var result = await signInManager.PasswordSignInAsync(model.Login, 
                                                                          model.Password, 
                                                                          model.RememberMe, 
                                                                          false);

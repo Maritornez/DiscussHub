@@ -26,10 +26,11 @@ public static class IdentitySeed
         
         // Создание Администратора
         const string adminEmail = "admin@mail.com";
+        const string adminName = "admin";
         const string adminPassword = "Aa123456!";
         if (await userManager.FindByNameAsync(adminEmail) == null)
         {
-            var admin = new User { Email = adminEmail, UserName = adminEmail };
+            var admin = new User { Email = adminEmail, UserName = adminName };
             var result = await userManager.CreateAsync(admin, adminPassword);
             if (result.Succeeded)
             {
@@ -39,10 +40,11 @@ public static class IdentitySeed
         
         // Создание Модератора
         const string moderatorEmail = "moderator@mail.com";
+        const string moderatorName = "moderator"; 
         const string moderatorPassword = "Aa123456!";
         if (await userManager.FindByNameAsync(moderatorEmail) == null)
         {
-            var moderator = new User { Email = moderatorEmail, UserName = moderatorEmail };
+            var moderator = new User { Email = moderatorEmail, UserName = moderatorName };
             var result = await userManager.CreateAsync(moderator, moderatorPassword);
             if (result.Succeeded)
             {
@@ -52,10 +54,11 @@ public static class IdentitySeed
         
         // Создание Пользователя
         const string userEmail = "user@mail.com";
+        const string userName = "user";
         const string userPassword = "Aa123456!";
         if (await userManager.FindByNameAsync(userEmail) == null)
         {
-            var user = new User { Email = userEmail, UserName = userEmail };
+            var user = new User { Email = userEmail, UserName = userName };
             var result = await userManager.CreateAsync(user, userPassword);
             if (result.Succeeded)
             {

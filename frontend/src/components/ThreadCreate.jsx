@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { Button, Form, Input, Upload } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import ThreadService from '../api/ThreadService'
 import PostService from '../api/PostService'
 
@@ -8,13 +10,23 @@ import PostService from '../api/PostService'
 // то есть нужно ввести данные главного поста
 // а данные нового треда заполняются автоматически
 
+const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+};
+
+
 
 export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
     const [title, setTitle] = useState("-");
     const [text, setText] = useState();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // предотвращение перезагрузки страницы при отправке формы
+    const [form] = Form.useForm();
+
+    const handleSubmit = async (formValues) => {
+        //e.preventDefault(); // предотвращение перезагрузки страницы при отправке формы
 
         // Получение значений полей формы
         //const title1 = e.target.elements.title.value;
@@ -69,17 +81,19 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
 
         // Очищение строки создания поста
         setTitle("-");
-        e.target.elements.title.value = "-";
+        //e.target.elements.title.value = "-";
         setText("");
-        e.target.elements.text.value = "";
-        if (e.target.elements.fileInput) {
-            e.target.elements.fileInput.value = "";
-        }
+        //e.target.elements.text.value = "";
+        // if (e.target.elements.fileInput) {
+        //     e.target.elements.fileInput.value = "";
+        // }
+        // Очищение формы методом antd
+        form.resetFields();
     }
 
     return (
         <>
-            <h4>Новый тред</h4>
+            {/* <h4>Создать тред</h4>
             <form onSubmit={handleSubmit}>
                 <label>Название: </label>
                 <input type="text" name="title" placeholder="Введите заголовок" defaultValue="-" required onChange={e => setTitle(e.target.value)}/>
@@ -90,7 +104,73 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
                 <input type="file" accept="image/*"></input>
                 <br />
                 <button type="submit">Создать</button>
-            </form>
+            </form> */}
+
+            <Form
+                form={form}
+                onFinish={handleSubmit}
+                name="threadCreate"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                style={{ maxWidth: 600 }}
+                initialValues={{ title: "-" }}
+                autoComplete="off"
+            >
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <h4>Создать тред</h4>
+                </div>
+
+                <Form.Item
+                    label="Заголовок"
+                    name="title"
+                    rules={[{  required: true, message: 'Заголовок не может быть пустым!' }]}
+                >
+                    <Input onChange={e => setTitle(e.target.value)}/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Текст поста"
+                    name="text"
+                    rules={[{ required: true, message: 'Текст поста не может быть пустым!' }]}
+                >
+                    <Input.TextArea rows={8} onChange={e => setText(e.target.value)}/>
+                </Form.Item>
+
+                <Form.Item 
+                    label="Upload" 
+                    valuePropName="fileList" 
+                    getValueFromEvent={normFile}
+                >
+                    <Upload action="/upload.do" listType="picture-card">
+                        <button
+                        style={{
+                            border: 0,
+                            background: 'none',
+                        }}
+                        type="button"
+                        >
+                        <PlusOutlined />
+                        <div
+                            style={{
+                            marginTop: 8,
+                            }}
+                        >
+                            Upload
+                        </div>
+                        </button>
+                    </Upload>
+                </Form.Item>
+
+
+                <Form.Item 
+                    wrapperCol={{ offset: 8, span: 16 }}
+                >
+                    <Button type="primary" htmlType="submit">
+                        Создать тред
+                    </Button>
+                </Form.Item>
+
+            </Form>
         </>
     )
 }

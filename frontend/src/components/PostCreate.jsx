@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
+import { Button, Form, Input, Upload } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import PostService from '../api/PostService';
 import ThreadService from '../api/ThreadService';
 
-export default function PostCreate({ undateAllPosts, threadId, userId }) {
+const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+};
+
+export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
     //const [replyToPostId, setReplyToPostId] = useState();
     const [title, setTitle] = useState("-");
     const [text, setText] = useState();
+    
 
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // предотвращение перезагрузки страницы при отправке формы
+    const handleSubmit = async (formValues) => {
+        //e.preventDefault(); // предотвращение перезагрузки страницы при отправке формы
 
         // Получание значений полей формы
         // нужно для того, чтобы при автоподстановке номера поста номер поста в replyToPostId обновлялся. С помощью OnChange на кнопке не автообновляется
-        const replyToPostId1 = e.target.elements.replyToPostId.value !== '' 
-                ? e.target.elements.replyToPostId.value : null
+        const replyToPostId1 = formValues.replyToPostId !== '' 
+                ? formValues.replyToPostId : null
         //setReplyToPostId(replyToPostId1); 
         //const title1 = e.target.elements.title.value !== '' 
         //                        ? e.target.elements.title.value : "-";
@@ -58,14 +68,16 @@ export default function PostCreate({ undateAllPosts, threadId, userId }) {
 
         // Очищение строки создания поста
         //setReplyToPostId();
-        e.target.elements.replyToPostId.value = "";
+        // formValues.replyToPostId = "";
         setTitle("-");
-        e.target.elements.title.value = "-";
+        // formValues.title = "-";
         setText("");
-        e.target.elements.text.value = "";
-        if (e.target.elements.fileInput) {
-            e.target.elements.fileInput.value = "";
-        }
+        // formValues.text = "";
+        // if (formValues.fileInput) {
+        //     formValues.fileInput = "";
+        // }
+        // Очищение формы методом antd
+        form.resetFields();
 
         // Обновление поля lastPostDateTime в tread
         var threadFromDB = await ThreadService.get(threadId);
@@ -85,17 +97,90 @@ export default function PostCreate({ undateAllPosts, threadId, userId }) {
 
     return (
         <>
-            <h4>Новый пост</h4>
+            {/* <h4>Создать пост</h4>
             <form onSubmit={handleSubmit}>
-                <label>Ответ на этот пост: </label>
+                <label>Ответить на пост #</label>
                 <input type="text" name="replyToPostId" placeholder="Введите номер поста"/>
                 <label>Заголовок: </label>
-                <input type="text" name="title" placeholder="Введите заголовок" defaultValue="-" required onChange={e => setTitle(e.target.value)}/>
-                <label>Текст: </label>
-                <textarea name="text" placeholder="Введите текста поста" required onChange={e => setText(e.target.value)}/>
-                <input type="file" accept="image/*"></input>
+                <input type="text" name="title" defaultValue="-" required onChange={e => setTitle(e.target.value)}/>
+                <label>Текст поста:</label>
+                <textarea name="text" required onChange={e => setText(e.target.value)}/>
+                <input type="file" name="fileInput" accept="image/*"></input>
                 <button type="submit">Создать</button>
-            </form>
+            </form> */}
+
+            <Form
+                form={form}
+                onFinish={handleSubmit}
+                name="postCreate"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                style={{ maxWidth: 600 }}
+                initialValues={{ title: "-" }}
+                autoComplete="off"
+            >
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <h4>Создать пост</h4>
+                </div>
+
+                <Form.Item
+                    label="Ответить на пост #"
+                    name="replyToPostId"
+                    rules={[{ required: true, message: 'Ответьте на пост, например, на OP' }]}
+                >
+                    <Input placeholder="Введите номер поста"/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Заголовок"
+                    name="title"
+                    rules={[{ required: true, message: 'Заголовок не может быть пустым' }]}
+                >
+                    <Input onChange={e => setTitle(e.target.value)}/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Текст поста"
+                    name="text"
+                    rules={[{ required: true, message: 'Текст поста не может быть пустым' }]}
+                >
+                    <Input.TextArea rows={8} onChange={e => setText(e.target.value)}/>
+                </Form.Item>
+
+                <Form.Item 
+                    label="Upload" 
+                    valuePropName="fileList" 
+                    getValueFromEvent={normFile}
+                >
+                    <Upload action="/upload.do" listType="picture-card">
+                        <button
+                        style={{
+                            border: 0,
+                            background: 'none',
+                        }}
+                        type="button"
+                        >
+                        <PlusOutlined />
+                        <div
+                            style={{
+                            marginTop: 8,
+                            }}
+                        >
+                            Upload
+                        </div>
+                        </button>
+                    </Upload>
+                </Form.Item>
+                
+                <Form.Item 
+                    wrapperCol={{ offset: 8, span: 16 }}
+                >
+                    <Button type="primary" htmlType="submit">
+                        Создать пост
+                    </Button>
+                </Form.Item>
+
+            </Form>
         </>
-  )
+    )
 }

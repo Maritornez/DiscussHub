@@ -18,7 +18,7 @@ const LogIn = ({ user, setUser }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: formValues.email,
+        login: formValues.login,
         password: formValues.password,
         // rememberme: formValues.rememberme,
       }),
@@ -95,13 +95,13 @@ const LogIn = ({ user, setUser }) => {
             autoComplete="off"
           >
             <Form.Item
-              label="Электронная почта"
-              name="email"
+              label="Логин"
+              name="login"
               rules={[
-                { required: true, message: "Пожалуйста, введите почту" },
+                { required: true, message: "Пожалуйста, введите логин" },
               ]}
             >
-              <Input placeholder="Email" />
+              <Input placeholder="Login" />
             </Form.Item>
 
             <Form.Item
