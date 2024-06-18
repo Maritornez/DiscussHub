@@ -37,11 +37,6 @@ public partial class Post
     [Column("createdAt")]
     public DateTimeOffset CreatedAt { get; set; }
 
-    [Column("authorIpAddress")]
-    [StringLength(100)]
-    [Unicode(true)]
-    public string AuthorIpAddress { get; set; } = null!;
-
     [InverseProperty("Post")]
     public virtual ICollection<Image> Image { get; set; } = new List<Image>();
 

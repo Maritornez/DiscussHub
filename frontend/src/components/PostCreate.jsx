@@ -3,19 +3,21 @@ import { Button, Form, Input, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import PostService from '../api/PostService';
 import ThreadService from '../api/ThreadService';
+import ImageService from '../api/ImageService'; 
+const { Dragger } = Upload;
 
-const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
-};
 
-export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
+export default function PostCreate({ updateAllPosts, threadId, userId, form }) {
     //const [replyToPostId, setReplyToPostId] = useState();
     const [title, setTitle] = useState("-");
     const [text, setText] = useState();
     
+    const normFile = (e) => {
+        if (Array.isArray(e)) {
+          return e;
+        }
+        return e?.fileList;
+    };    
 
     const handleSubmit = async (formValues) => {
         //e.preventDefault(); // предотвращение перезагрузки страницы при отправке формы
@@ -44,27 +46,33 @@ export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
         //         console.log("Файл не выбран");
         //     }
         // }
-        // Обработка выбранного файла
-        //...                                                                       // Добавить обработку файла
 
         
 
-        // Создание объекта, который отправится на сервер
+        // Создание объекта поста, который отправится на сервер
         const post = {
             threadId: threadId,
-            replyToPostId: replyToPostId1,                                          // Добавить возможность отвечать на посты
-            userId: userId.toString(),                                            // Добавить запись userId
+            replyToPostId: replyToPostId1, 
+            userId: userId.toString(),            
             isOriginalPost: false,
             title: title,
             text: text,
-            createdAt: dateTime1,
-            authorIpAddress: "127.0.0.1"                                            // Добавить запись IP-адреса пользователя
-            //image: null                                                           // Добавить обработку изображений
-        }
+            createdAt: dateTime1
+     }
 
         // Создание поста на сервере и на клиенте
-        await PostService.create(post);
-        undateAllPosts();
+        const createdPost = await PostService.create(post);
+
+        // Создание записи в таблице Image и загрузка изображения на сервер
+        if (formValues.fileInput && formValues.fileInput.length > 0) {
+            const formData = new FormData();
+            formData.append('FormFile', formValues.fileInput[0].originFileObj);
+            formData.append('PostId', createdPost.id);
+
+            await ImageService.upload(formData);
+        }
+
+        updateAllPosts();
 
         // Очищение строки создания поста
         //setReplyToPostId();
@@ -85,13 +93,16 @@ export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
             id: threadFromDB.id,
             themeId: threadFromDB.themeId,
             userId: threadFromDB.userId,
-            authorIpAddress: threadFromDB.authorIpAddress,
             isPinned: threadFromDB.isPinned,
             isArchived: threadFromDB.isArchived,
             createdAt: threadFromDB.createdAt,
             lastPostDateTime: dateTime1
         }
         await ThreadService.update(thread);
+        
+
+        // Обработка сохранение изображения в базе данных
+
         
     }
 
@@ -148,11 +159,16 @@ export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
                 </Form.Item>
 
                 <Form.Item 
-                    label="Upload" 
+                    label="Картинка:"
+                    name="fileInput"
                     valuePropName="fileList" 
                     getValueFromEvent={normFile}
                 >
-                    <Upload action="/upload.do" listType="picture-card">
+                    <Dragger
+                        listType="picture-card"
+                        maxCount={1}
+                        beforeUpload={() => false}
+                    >
                         <button
                         style={{
                             border: 0,
@@ -169,7 +185,7 @@ export default function PostCreate({ undateAllPosts, threadId, userId, form }) {
                             Upload
                         </div>
                         </button>
-                    </Upload>
+                    </Dragger>
                 </Form.Item>
                 
                 <Form.Item 

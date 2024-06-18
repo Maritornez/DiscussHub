@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 // HashLink используется для создания якорей на странице. Якори прикреплены к постам. Ссылки в ответах к постам ведут к якорям постов
-import { HashLink } from 'react-router-hash-link';
-import { Button, Form, Tooltip, Tree  } from 'antd';
+// import { HashLink } from 'react-router-hash-link';
+import { Button, Form, Image, Input, Modal, Tooltip, Tree, Typography  } from 'antd';
 import { EditOutlined, DeleteOutlined  } from '@ant-design/icons';
 import ThreadService from '../api/ThreadService';
 import PostService from '../api/PostService';
+import ImageService from '../api/ImageService';
 import PostCreate from './PostCreate';
+import ReactMarkdown from 'react-markdown';
+
+const { Title } = Typography;
+
 
 
 export default function PostList({user}) {
@@ -16,8 +21,11 @@ export default function PostList({user}) {
 
   const [thread, setThread] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [editPost, setEditPost] = useState(null); // состояние для хранения поста для редактирования
 
-  const [form] = Form.useForm(); // форма для создания поста
+  const [form] = Form.useForm();
+  const [images, setImages] = useState({});
 
   const loadThreadAndPosts = useCallback(async () => {
     // Загрузка треда.
@@ -30,11 +38,27 @@ export default function PostList({user}) {
     const postsData = await PostService.getByThreadId(threadId);
     setPosts(postsData);
     //console.log(posts)
+
+    const imagesData = await fetchImages(postsData);
+    setImages(imagesData);
   }, [threadId]);
 
   useEffect(() => {
     loadThreadAndPosts();
   }, [threadId, loadThreadAndPosts]);
+
+  const fetchImages = async (posts) => {
+    const imagesData = {};
+    for (const post of posts) {
+        if (post.image.length > 0) {
+        const imageUrl = await ImageService.getFileByPostId(post.id);
+        if (imageUrl) {
+          imagesData[post.id] = imageUrl;
+        }
+        }
+    }
+    return imagesData;
+  };
 
   // Функция обновления конкретного поста
   // const updateThePostOnClient = (post) => {
@@ -49,6 +73,27 @@ export default function PostList({user}) {
   // const removePostOnClient = (removeId) => {
   //   setPosts(posts.filter(({ id }) => id !== removeId));
   // }
+
+  // Обработка редактирования поста с помощью модального окна
+  const handleEditPostModal = (post) => {
+    setEditPost(post)
+    setEditModalOpen(true);
+  };
+
+  const handleEditPost = async (values) => {
+    const updatedPost = { ...editPost, ...values };
+    const isUpdated = await PostService.update(updatedPost);
+    if (isUpdated) {
+      setPosts(posts.map((post) => post.id === updatedPost.id ? updatedPost : post));      
+    }
+      setEditModalOpen(false);
+      setEditPost(null);
+  }
+
+  const handleCancelEdit = () => {
+    setEditModalOpen(false);
+    setEditPost(null);
+  };
 
   // Функция удаления поста в БД и на клиенте
   const handleDelete = async (id) => {
@@ -110,12 +155,16 @@ export default function PostList({user}) {
       }}>
         #{post.id} {" "}
         {formatDateTime(post.createdAt)} {" "}
-        {post.userAuthor && post.userAuthor.userName} {" "}
+        {post.user && post.user.userName} {" "}
 
         {user && user.isAuthenticated &&
           <Tooltip title="Ответить">
             <Button type="text" size="small" onClick={() => copyPostId(post.id)}>↩</Button> {" "}
           </Tooltip>}
+
+        {user && user.isAuthenticated && (user.userRole === "moderator" || user.userRole === "admin") &&
+          <Button type="text" size="small" onClick={() => handleEditPostModal(post)}><EditOutlined /></Button>} {" "}
+
         {!post.isOriginalPost && user && user.isAuthenticated && (user.userRole === "moderator" || user.userRole === "admin") &&
           <Button type="text" size="small" onClick={() => handleDelete(post.id)}><DeleteOutlined /></Button>} {" "}
         <br />
@@ -123,18 +172,24 @@ export default function PostList({user}) {
         <strong>{post.title}</strong>
         <br />
         <br />
-        <p>{post.text}</p>
+
+        <div style={{ display: 'flex', justifyContent: 'left', margin: '0px' }}>
+          {images[post.id] && <Image src={images[post.id]} alt={`Image for post ${post.id}`} width={400}/>}
+          <div style={{ margin: '0 20px', whiteSpace: 'pre-wrap' }}>
+            <ReactMarkdown>{post.text}</ReactMarkdown>
+          </div>
+        </div>
         
-        {post.inverseReplyToPost.length !== 0 && <>Ответы: {" "}</>} 
-        {post.inverseReplyToPost.map(({ id }) => (
+        {/*post.inverseReplyToPost.length !== 0 && <>Ответы: {" "}</>*/} 
+        {/*post.inverseReplyToPost.map(({ id }) => (
             <span key={id}>
               <HashLink to={`/theme/${themeName}/thread/${threadId}#${id}`}> 
                 #{id} {" "}
               </HashLink>
             </span>
-        ))}
+        ))*/}
 
-        <hr />
+        
       </div>,
     key: post.id,
     children: post.children.map(convertPostToTreeNode),
@@ -210,9 +265,65 @@ function Posts() {
 
   return (
     <>
+      <Title level={4}>
+       {themeName} {" > "} Тред #{thread && thread.id} {" "}
+        {thread && thread.isPinned ? "📌" : ""} {" "}
+          {thread && thread.isArchived ? "🗃️" : ""} {" "}
+      </Title>
+      <hr />
+
       {user && user.isAuthenticated &&
-        <PostCreate undateAllPosts={loadThreadAndPosts} threadId={threadId} userId={user.id} form={form}/>}
+        <PostCreate updateAllPosts={loadThreadAndPosts} threadId={threadId} userId={user.id} form={form}/>}
+
       <Posts />
+
+      <Modal
+        title="Редактирование поста"
+        open={isEditModalOpen}
+        onCancel={handleCancelEdit}
+        footer={null}
+      >
+        <Form
+          initialValues={editPost}
+          onFinish={handleEditPost}
+        >
+          <Form.Item
+            name="title"
+            label="Заголовок"
+            rules={[
+              {
+                required: true,
+                message: 'Пожалуйста, введите заголовок поста',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="text"
+            label="Текст"
+            rules={[
+              {
+                required: true,
+                message: 'Пожалуйста, введите текст поста',
+              },
+            ]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Сохранить
+            </Button>
+
+            <Button type="text" onClick={handleCancelEdit}>
+              Отмена
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   )
 }

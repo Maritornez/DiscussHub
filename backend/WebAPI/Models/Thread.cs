@@ -21,11 +21,6 @@ public partial class Thread
     [Unicode(true)]
     public string? UserId { get; set; }
 
-    [Column("authorIpAddress")]
-    [StringLength(100)]
-    [Unicode(true)]
-    public string AuthorIpAddress { get; set; } = null!;
-
     [Column("isPinned")]
     public bool IsPinned { get; set; }
 

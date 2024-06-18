@@ -145,6 +145,7 @@ export default class PostService {
                 console.error("Failed to delete post");
                 return false;
             }
+
             return true;
         } catch (error) {
             console.error("Error while deleting post:", error);

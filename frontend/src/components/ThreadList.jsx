@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Form, Input, Modal, Typography } from 'antd';
+import { debounce } from 'lodash';
+import { Button, Form, Input, Modal, Typography, Select } from 'antd';
 import ThemeService from '../api/ThemeService';
 import ThreadService from '../api/ThreadService';
 import PostService from '../api/PostService';
+import RatingService from '../api/RatingService';
+import ImageService from '../api/ImageService';
 import ThreadCreate from './ThreadCreate';
 import ThreadListCard from './ThreadListCard';
 const {Title} = Typography;
+const {Search} = Input;
 
 export default function ThreadList({user}) {
   // Получаем значение параметров из URL.  
@@ -15,17 +19,19 @@ export default function ThreadList({user}) {
 
   const [theme, setTheme] = useState(null);
   const [threads, setThreads] = useState([]);
+  const [selectedThreads, setSelectedThreads] = useState([]); // выбранные с помощью поиска треды
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editThreadOP, setEditThreadOP] = useState(null); // состояние для хранения треда для редактирования
+  const [sortOrder, setSortOrder] = useState('crowded');
 
-
+  const [images, setImages] = useState({});
   
-
   const loadThemeAndThreads = useCallback(async () => {
     // Загрузка информации о теме
     const data = await ThemeService.getByName(name);
     setTheme(data);
 
+    const originalPostsData = [];
     // Загрузка тредов с главными постами
     if (data && data.thread) {
       const threadsArray = [];
@@ -34,8 +40,15 @@ export default function ThreadList({user}) {
         const threadWithMainPost = 
           await ThreadService.getOnlyWithOriginalPost(threadItem.id);
         threadsArray.push(threadWithMainPost);
+        originalPostsData.push(threadWithMainPost.post[0])
       }
-      setThreads(threadsArray);
+      setThreads(threadsArray)
+      setSelectedThreads(threadsArray)
+    }
+
+    if (originalPostsData.length > 0) {
+      const imagesData = await fetchImages(originalPostsData);
+      setImages(imagesData);
     }
   }, [name]);
 
@@ -45,6 +58,16 @@ export default function ThreadList({user}) {
     loadThemeAndThreads();
   }, [name, loadThemeAndThreads]);
 
+  const fetchImages = async (posts) => {
+    const imagesData = {};
+    for (const post of posts) {
+      const imageUrl = await ImageService.getFileByPostId(post.id);
+      if (imageUrl) {
+        imagesData[post.id] = imageUrl;
+      }
+    }
+    return imagesData;
+  };
 
   // Функция добавления треда на клиенте
   // const addThreadOnClient = (newThread) => setThreads([...threads, newThread]);
@@ -65,7 +88,6 @@ export default function ThreadList({user}) {
       title: thread.post[0].title,
       text: thread.post[0].text,
       createdAt: thread.post[0].createdAt,
-      authorIpAddress: thread.post[0].authorIpAddress,
     }
     setEditThreadOP(post);
     setEditModalOpen(true);
@@ -147,10 +169,35 @@ export default function ThreadList({user}) {
   //   );
   // }
 
+    // Отсортировать тред по выбранному параметру
+  const sortThreads = (threads, sortOrder) => {
+    switch (sortOrder) {
+      case 'dateNew':
+        return threads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      case 'dateOld':
+        return threads.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      case 'likes':
+        return threads.sort((a, b) => RatingService.getPositivesCountByThreadId(b.id) - RatingService.getPositivesCountByThreadId(a.id)); 
+      default:
+        return threads;
+    }
+  };
+  
+  const onSearchChange  = debounce((e) => {
+    const value = e.target.value.toLowerCase();
+    setSelectedThreads(threads.map(thread => 
+      (thread.post[0].title.toLowerCase().includes(value) 
+      || thread.post[0].text.toLowerCase().includes(value)) 
+      ? thread : null)
+      .filter(thread => thread !== null))
+  }, 300); // 300 ms debounce delay
+  
+
   function Threads() {
+    const sortedThreads = sortThreads([...selectedThreads], sortOrder);
     return (
       <>
-        {threads && threads.map(({ id, isPinned, isArchived, createdAt, post, user: userAuthor, rating }) => (
+        {sortedThreads && sortedThreads.map(({ id, isPinned, isArchived, createdAt, post, user: userAuthor, rating }) => (
           <ThreadListCard
             key={id}
             metaTitle={
@@ -164,10 +211,12 @@ export default function ThreadList({user}) {
             description={post && post[0] && post[0].text}
             threadId={id}
             themeName={theme && theme.name}
+            image={post === null ? null : images[post[0].id]}
 
             user={user}
             onEditModal={handleEditThreadModal}
             onDelete={handleDeleteThread}
+            updateAllThreads={loadThemeAndThreads}
           />
         ))}
       </>
@@ -175,10 +224,13 @@ export default function ThreadList({user}) {
   }
 
 
+
+  
   return (
     <>
       <Title>{theme && theme.name}</Title>
       <Title level={3}>{theme && theme.description}</Title>
+
 
       {user && user.isAuthenticated && 
       <ThreadCreate updateAllThreads={loadThemeAndThreads} 
@@ -186,7 +238,24 @@ export default function ThreadList({user}) {
                     userId = {user.id}
                     /> }
 
+      <Search
+        placeholder="Поиск"
+        onChange={onSearchChange}
+        style={{
+          width: 200,
+        }}
+      />
+      {" "}
+
+      <Select value={sortOrder} onChange={(value) => setSortOrder(value)} style={{ marginBottom: '1rem' }}>
+        <Select.Option value="crowded">Обсуждаемые</Select.Option>
+        <Select.Option value="dateNew">Новые</Select.Option>
+        <Select.Option value="dateOld">Старые</Select.Option>
+        <Select.Option value="likes">Рейтинговые</Select.Option>
+      </Select>
+
       <Threads />
+
 
       <Modal
         title="Редактировать тред"

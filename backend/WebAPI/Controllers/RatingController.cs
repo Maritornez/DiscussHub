@@ -38,6 +38,24 @@ namespace WebAPI.Controllers
 
             return Ok(rating);
         }
+        
+        // Получить количество положительных рейтингов по треду
+        [HttpGet("CountPositive/{threadId:int}")]
+        public async Task<IActionResult> GetCountPositive(int threadId)
+        {
+            return Ok(await context.Rating
+                .Where(r => r.ThreadId == threadId && r.IsPositive == true)
+                .CountAsync());
+        }
+        
+        // Получить количество 
+        [HttpGet("CountNegative/{threadId:int}")]
+        public async Task<IActionResult> GetCountNegative(int threadId)
+        {
+            return Ok(await context.Rating
+                .Where(r => r.ThreadId == threadId && r.IsPositive == false)
+                .CountAsync());
+        }
 
         // POST api/<RatingController>
         [HttpPost]

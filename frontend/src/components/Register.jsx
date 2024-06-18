@@ -18,7 +18,7 @@ const Register = ({ user, setUser }) => {
      * Функция обращения к swagger для регистрации
      * @param {any} event
      */
-    const Register = async (formValues) => {
+    const register = async (formValues) => {
         //event.preventDefault();
 
         // var { email, password, passwordConfirm } = event.target.elements;
@@ -35,10 +35,7 @@ const Register = ({ user, setUser }) => {
                 passwordConfirm: formValues.passwordConfirm,
             }),
             credentials: 'include', // включает отправку куки с запросами, даже когда идет кроссдоменный запрос
-        };
-
-
-        
+        }; 
 
         return await fetch(WebAPI_URL + "account/register", requestOptions)
             .then((response) => {
@@ -109,8 +106,8 @@ const Register = ({ user, setUser }) => {
             </form> */}
 
             <Form
-            onFinish={Register}
-            name="basic"
+            onFinish={register}
+            name="registerForm"
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 600 }}

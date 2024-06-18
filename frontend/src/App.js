@@ -7,11 +7,13 @@ import Layout from './components/Layout';
 import Register from './components/Register';
 import LogIn from './components/LogIn';
 import LogOff from './components/LogOff';
+import AccountPage from './components/AccountPage';
+import ScrollButtons from './components/ScrollButtons';
 
 
 export default function App() {
   // Текущий вошедший пользователь
-  const [user, setUser] = useState({ isAuthenticated: false, userName: "", id: "", userRole: "" })
+  const [user, setUser] = useState({ isAuthenticated: false, userName: "", email: "", id: "", userRole: "" })
 
   // useEffect(() => {
   //   const getUser = async () => {
@@ -70,19 +72,22 @@ export default function App() {
   // );
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout user={user}/>}>
-          <Route index element={<Home />}/>
-          <Route path='theme/:name' element={<ThreadList user={user}/>}/>
-          <Route path='theme/:name/thread/:id' element={<PostList user={user}/>}/>
-          <Route path='/register' element={<Register user={user} setUser={setUser} />}/>
-          <Route path="/login" element={<LogIn user={user} setUser={setUser} />} />
-          <Route path="/logoff" element={<LogOff user={user} setUser={setUser} />} />
-          <Route path="*" element={<Navigate to="/" />}/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout user={user}/>}>
+            <Route index element={<Home />}/>
+            <Route path='theme/:name' element={<ThreadList user={user}/>}/>
+            <Route path='theme/:name/thread/:id' element={<PostList user={user}/>}/>
+            <Route path="/account" element={<AccountPage user={user}/>}/>
+            <Route path='/register' element={<Register user={user} setUser={setUser} />}/>
+            <Route path="/login" element={<LogIn user={user} setUser={setUser} />} />
+            <Route path="/logoff" element={<LogOff user={user} setUser={setUser} />} />
+            <Route path="*" element={<Navigate to="/" />}/>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <ScrollButtons />
+    </>
   );
-
 }

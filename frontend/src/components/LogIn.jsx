@@ -28,7 +28,7 @@ const LogIn = ({ user, setUser }) => {
     return await fetch(WebAPI_URL + "account/login", requestOptions)
       .then((response) => {
         if (response.status === 200) {
-          setUser({ isAuthenticated: true, userName: "" });
+          setUser({ isAuthenticated: true, userName: "", email: "", id: "", userRole: "" });
         }
         return response.json();
       })
@@ -37,6 +37,7 @@ const LogIn = ({ user, setUser }) => {
           //console.log("Data:", data)
           if (typeof data !== "undefined" &&
               typeof data.userName !== "undefined" &&
+              typeof data.email !== "undefined" &&
               typeof data.dateTimeJoined !== "undefined" &&
               typeof data.lastVisited !== "undefined" &&
               typeof data.id !== "undefined" &&
@@ -44,6 +45,7 @@ const LogIn = ({ user, setUser }) => {
           {
             setUser({ isAuthenticated: true, 
                       userName: data.userName,
+                      email: data.email,
                       dateTimeJoined: data.dateTimeJoined,
                       lastVisited: data.lastVisited,
                       id: data.id,

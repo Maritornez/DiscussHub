@@ -13,6 +13,9 @@ const Layout = ({ user }) => {
       key: "1",
     },
     {
+      label: <Link to={"/account"}>Аккаунт</Link>
+    },
+    {
       label: <Link to={"/register"}>Регистрация</Link>,
       key: "2",
     },
@@ -68,13 +71,16 @@ const Layout = ({ user }) => {
       >
         <img src={logoImage} alt="-" width="64" height="64" style={{
             float: "left",}}/>
+
         <div className="demo-logo" />
+
         <div 
           style={{
             float: "right",
             color: "rgba(255, 255, 255, 0.65)",
           }}
         >
+          
           {user.isAuthenticated ? (
             <>
               <strong>{user.userName}</strong> {" "}
@@ -83,7 +89,9 @@ const Layout = ({ user }) => {
           ) : (
             <strong>Гость</strong>
           )}
+          
         </div>
+
         <Menu 
           theme="dark" 
           mode="horizontal" 

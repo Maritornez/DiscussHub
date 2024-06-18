@@ -110,13 +110,16 @@ export default function ThemeList({user}) {
   return (
     <>
       <Themes />
+
       {user && user.isAuthenticated && user.userRole === "admin" &&
         <ThemeCreate addThemeOnClient={addThemeOnClient}/>}
+
       <Modal 
         title="Вы уверены, что хотите удалить эту тему?" 
         open={isDeleteModalOpen} 
         onOk={handleDeleteTheme} 
         onCancel={() => setDeleteModalOpen(false)}></Modal>
+
       <Modal
         title="Редактировать тему"
         open={isEditModalOpen}
@@ -134,6 +137,7 @@ export default function ThemeList({user}) {
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             name="description"
             label="Описание"
@@ -141,10 +145,12 @@ export default function ThemeList({user}) {
           >
             <Input.TextArea />
           </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Сохранить
             </Button>
+            
             <Button onClick={handleCancelEdit} style={{ marginLeft: '10px' }}>
               Отмена
             </Button>

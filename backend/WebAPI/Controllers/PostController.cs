@@ -46,6 +46,7 @@ namespace WebAPI.Controllers
             return Ok(post);
         }
         
+        //
         // GET api/<PostController>/WithThreadId/5
         [HttpGet("WithThreadId/{id:int}")]
         public async Task<IActionResult> GetWithThreadId(int id)
@@ -152,7 +153,23 @@ namespace WebAPI.Controllers
             {
                 return NotFound();
             }
+            
+            var postImages = await context.Image
+                .Where(i => i.PostId == id)
+                .ToListAsync();
+            
+            // Сначала удаляются все связанные с постом изображения
+            foreach (var image in postImages)
+            {
 
+                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", image.Name);
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+                
+                context.Image.Remove(image);
+            }
             context.Post.Remove(post);
             await context.SaveChangesAsync();
             

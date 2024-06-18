@@ -27,11 +27,6 @@ public partial class Image
     [Unicode()]
     public string Name { get; set; } = null!;
 
-    [Column("filePath")]
-    [StringLength(1000)]
-    [Unicode()]
-    public string FilePath { get; set; } = null!;
-
     [ForeignKey("PostId")]
     [InverseProperty("Image")]
     public virtual Post? Post { get; set; }

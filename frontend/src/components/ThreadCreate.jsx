@@ -3,6 +3,9 @@ import { Button, Form, Input, Upload } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import ThreadService from '../api/ThreadService'
 import PostService from '../api/PostService'
+import ImageService from '../api/ImageService'
+
+const { Dragger } = Upload; 
 
 
 // Поскольку тред является оболочкой для списка постов с главным постом
@@ -47,14 +50,11 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
         //         console.log("Файл не выбран");
         //     }
         // }
-        // Обработка выбранного файла
-        //...                                                                       // Добавить обработку файла
 
         // Создание объекта треда, который отправится на сервер
         const thread = {
             themeId: themeId,
-            userId: userId.toString(),                                              // Добавить запись userId
-            authorIpAddress: "127.0.0.1",                                  // Добавить запись IP-адреса пользователя
+            userId: userId.toString(),
             isPinned: false,
             isArchived: false,
             createdAt: dateTime1,
@@ -65,17 +65,25 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
         // Создание объекта поста, который отправится на сервер
         const post = {
             threadId: createdThread.id,
-            replyToPostId: null,                                          // Добавить возможность отвечать на посты
-            userId: userId.toString(),                                             // Добавить запись userId
+            replyToPostId: null,
+            userId: userId.toString(),
             isOriginalPost: true,
             title: title,
             text: text,
             createdAt: dateTime1,
-            authorIpAddress:	"127.0.0.1",                                  // Добавить запись IP-адреса пользователя
-            //image: null                                                   // Добавить обработку изображений
         }
         
-        await PostService.create(post);
+        const createdPost = await PostService.create(post);
+
+        // Создание записи в таблице Image и загрузка изображения на сервер
+        if (formValues.fileInput && formValues.fileInput.length > 0) {
+            const formData = new FormData();
+            formData.append('FormFile', formValues.fileInput[0].originFileObj);
+            formData.append('PostId', createdPost.id);
+
+            await ImageService.upload(formData);
+        }
+
         // Обновление списка тредов на клиенте (чтобы отображался новый тред с оригинальным постом)
         updateAllThreads();
 
@@ -137,11 +145,16 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
                 </Form.Item>
 
                 <Form.Item 
-                    label="Upload" 
-                    valuePropName="fileList" 
+                    label="Картинка:"
+                    name="fileInput"
+                    valuePropName="fileList"
                     getValueFromEvent={normFile}
                 >
-                    <Upload action="/upload.do" listType="picture-card">
+                    <Dragger
+                        listType="picture-card"
+                        maxCount={1}
+                        beforeUpload={() => false}
+                    >
                         <button
                         style={{
                             border: 0,
@@ -158,7 +171,7 @@ export default function ThreadCreate({ updateAllThreads, themeId, userId }) {
                             Upload
                         </div>
                         </button>
-                    </Upload>
+                    </Dragger>
                 </Form.Item>
 
 

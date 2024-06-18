@@ -189,5 +189,94 @@ namespace WebAPI.Controllers
                             userRole }); 
         }
         private Task<User?> GetCurrentUserAsync() => userManager.GetUserAsync(HttpContext.User);
+        
+        [HttpPost]
+        [Route("EditEmail")]
+        [Authorize]
+        public async Task<IActionResult> EditEmail([FromBody] EditEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Сначала выполните вход" });
+                }
+
+                user.Email = model.NewEmail;
+                var result = await userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return Ok(new { message = "Электронная почта успешно изменена", email = user.Email });
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    var errorMsg = new
+                    {
+                        message = "Не удалось изменить электронную почту",
+                        error = ModelState.Values.SelectMany(e => e.Errors.Select(er => er.ErrorMessage))
+                    };
+                    return BadRequest(errorMsg);
+                }
+            }
+            else
+            {
+                var errorMsg = new
+                {
+                    message = "Неверные входные данные",
+                    error = ModelState.Values.SelectMany(e => e.Errors.Select(er => er.ErrorMessage))
+                };
+                return BadRequest(errorMsg);
+            }
+        }
+        
+        [HttpPost]
+        [Route("EditPassword")]
+        [Authorize]
+        public async Task<IActionResult> EditPassword([FromBody] EditPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Сначала выполните вход" });
+                }
+
+                var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    return Ok(new { message = "Пароль успешно изменен" });
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    var errorMsg = new
+                    {
+                        message = "Не удалось изменить пароль",
+                        error = ModelState.Values.SelectMany(e => e.Errors.Select(er => er.ErrorMessage))
+                    };
+                    return BadRequest(errorMsg);
+                }
+            }
+            else
+            {
+                var errorMsg = new
+                {
+                    message = "Неверные входные данные",
+                    error = ModelState.Values.SelectMany(e => e.Errors.Select(er => er.ErrorMessage))
+                };
+                return BadRequest(errorMsg);
+            }
+        }
     }
 }
