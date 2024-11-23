@@ -88,6 +88,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
@@ -97,6 +98,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseDefaultFiles(); // Для предоставления index.html
 app.UseStaticFiles();  // Для обслуживания файлов фронтенда
 
 app.Run();

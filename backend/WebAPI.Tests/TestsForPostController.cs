@@ -168,7 +168,15 @@ namespace WebAPI.Tests
             };
 
             // Detach the existing entity to avoid tracking conflict
-            context.Entry(await context.Post.FindAsync(1)).State = EntityState.Detached;
+            var existingPost = await context.Post.FindAsync(1);
+            if (existingPost != null)
+            {
+                context.Entry(existingPost).State = EntityState.Detached;
+            }
+            else
+            {
+                throw new Exception("Post not found");
+            }
 
             // Act
             var result = await controller.Put(1, postToUpdate);

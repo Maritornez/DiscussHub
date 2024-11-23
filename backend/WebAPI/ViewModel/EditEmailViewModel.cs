@@ -6,5 +6,5 @@ public class EditEmailViewModel
 {
     [Required]
     [EmailAddress]
-    public string NewEmail { get; set; }
+    public required string NewEmail { get; set; }
 }
