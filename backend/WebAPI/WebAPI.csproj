@@ -8,6 +8,20 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="efpt.config.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\asset-manifest.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\icon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\index.html" />
+    <_ContentIncludedByDefault Remove="wwwroot\manifest.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\css\main.6006938a.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\css\main.6006938a.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.6d47ce4a.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.6d47ce4a.js.LICENSE.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.6d47ce4a.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\media\icon.ed7eee2f639d3e3a0015.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\media\round-table.86d7ded5f32daf1caa44.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.ceb6ff9d.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.ceb6ff9d.js.LICENSE.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\static\js\main.ceb6ff9d.js.map" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +31,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

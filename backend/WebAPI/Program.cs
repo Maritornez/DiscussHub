@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         builderA =>
         {
-            builderA.WithOrigins("http://localhost:3000") // замените на URL вашего клиентского приложения
+            builderA.WithOrigins("http://localhost:3000") // URL клиентского приложения
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -27,13 +27,15 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ForumContext>();
+
 // Choose DB
-/**************************************************************************************************************************************************/
 builder.Services.AddDbContext<ForumContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("MsSqlServerConnection")));
 //builder.Services.AddDbContext<ForumContext>(opt => opt.UseInMemoryDatabase("ForumDB"));
-/**************************************************************************************************************************************************/
-builder.Services.AddControllers().AddJsonOptions(x =>
-    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // Добавляется сервис, который предоставляет метаданные о конечных точках API. Это необходимо для интеграции с инструментами документации, такими как Swagger/OpenAPI
