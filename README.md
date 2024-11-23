@@ -7,9 +7,9 @@
 
 ![alt text](README.md.images/Icon.jpg)
 
-Приложение запускается на http://localhost:5278
+Приложение запускается на `http://localhost:5278`
 
-Swagger: http://localhost:5278/swagger
+Swagger: `http://localhost:5278/swagger`
 
 # Содержание
 - [1. Разработка и анализ требований](#1-разработка-и-анализ-требований)
