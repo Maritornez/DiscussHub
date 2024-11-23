@@ -1,5 +1,10 @@
 # DiscussHub — Интернет-форум
 
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Ant Design](https://img.shields.io/badge/UI-AntDesign-%230170FE)
+![ASP.NET Core](https://img.shields.io/badge/Backend-ASP.NET_Core-purple)
+![SQL Server](https://img.shields.io/badge/Database-SQL_Server-orange)
+
 ![alt text](README.md.images/Icon.jpg)
 
 
