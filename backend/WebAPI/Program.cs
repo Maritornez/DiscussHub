@@ -97,4 +97,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseStaticFiles();  // Для обслуживания файлов фронтенда
+
 app.Run();

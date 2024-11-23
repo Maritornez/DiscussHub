@@ -1,6 +1,7 @@
 /backend/.idea/
 /backend/.vs/
 /backend/WebAPI/bin/
+/backend/WebAPI/wwwroot/*
 /backend/WebAPI/obj/
 /backend/WebAPI.Tests/bin/
 /backend/WebAPI.Tests/obj/
